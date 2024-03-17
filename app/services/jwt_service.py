@@ -4,8 +4,8 @@ from dotenv import load_dotenv
 from flask import request
 import jwt
 
-from backend.app.database import Session
-from backend.app.models.user import User
+from app.database import Session
+from app.models.user import User
 
 load_dotenv()
 

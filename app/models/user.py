@@ -8,3 +8,4 @@ class User(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_name: Mapped[str]
     password: Mapped[str]
+

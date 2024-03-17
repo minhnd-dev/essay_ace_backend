@@ -33,6 +33,28 @@ def register():
     }
 
 
+@auth_bp.route('/change_password', methods=['PUT'])
+def change_password():
+    session = Session()
+
+    user_name = request.json.get("user_name", None)
+    new_password = request.json.get("new_password", None)
+    password = request.json.get("password", None)
+    user = session.query(User).filter_by(user_name=user_name).first()
+
+    if bcrypt.checkpw(password.encode('utf-8'), user.password):
+        hashed_new_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
+        user.password = hashed_new_password
+        session.commit()
+        return {
+            "message": "Password changed successfully"
+        }, 200
+    else:
+        return {
+            "message": "Wrong old password"
+        }, 401
+
+
 @auth_bp.route('/login', methods=['POST'])
 def login():
     session = Session()
