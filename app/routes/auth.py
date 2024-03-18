@@ -21,7 +21,7 @@ def register():
     if not password:
         return "Missing password", 400
 
-    hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+    hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
     user = User(user_name=user_name, password=hashed)
 
@@ -42,8 +42,8 @@ def change_password():
     password = request.json.get("password", None)
     user = session.query(User).filter_by(user_name=user_name).first()
 
-    if bcrypt.checkpw(password.encode('utf-8'), user.password):
-        hashed_new_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
+    if bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
+        hashed_new_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
         user.password = hashed_new_password
         session.commit()
         return {
@@ -73,7 +73,7 @@ def login():
             "message": "User not found"
         }, 401
 
-    if bcrypt.checkpw(password.encode('utf-8'), user.password):
+    if bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
         token = jwt.encode(
             {
                 "user_name": user.user_name,
