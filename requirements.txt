@@ -7,3 +7,4 @@ pydantic~=2.6.4
 black
 psycopg2
 alembic
+flask_cors
