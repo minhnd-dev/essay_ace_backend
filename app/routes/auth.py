@@ -13,19 +13,18 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 
 @auth_bp.route("/register", methods=["POST"])
-def register():
+@validate_body(AuthSchema)
+def register(body: AuthSchema):
     session = Session()
 
-    user_name = request.json.get("user_name", None)
-    password = request.json.get("password", None)
-    if not user_name:
+    if not body.user_name:
         return "Missing user_name", 400
-    if not password:
+    if not body.password:
         return "Missing password", 400
 
-    hashed = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+    hashed = bcrypt.hashpw(body.password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
-    user = User(user_name=user_name, password=hashed)
+    user = User(user_name=body.user_name, password=hashed)
 
     session.add(user)
     session.commit()

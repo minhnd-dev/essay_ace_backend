@@ -6,18 +6,20 @@ from flask import Blueprint, request
 
 from app.database import Session
 from app.models.topic import Topic
+from app.schema.auth import AuthSchema
+from app.schema.topic import TopicSchema
 from app.services.jwt_service import jwt_required
+from app.services.validation_service import validate_body
 
 write_bp = Blueprint('write', __name__, url_prefix='/write')
 
 
 @write_bp.route('/topic', methods=['POST'])
 @jwt_required
-def post_topics(current_user):
+@validate_body(TopicSchema)
+def post_topics(current_user, body: AuthSchema):
     session = Session()
-
-    content = request.json.get("content")
-    topic = Topic(content=content, user_id=current_user.id)
+    topic = Topic(content=body.content, user_id=current_user.id)
     session.add(topic)
     session.commit()
     return {
