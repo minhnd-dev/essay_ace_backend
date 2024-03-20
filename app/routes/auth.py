@@ -1,5 +1,5 @@
 import os
-
+import openai
 import bcrypt
 import jwt
 from flask import Blueprint, request
@@ -10,6 +10,8 @@ from app.schema.auth import AuthSchema
 from app.services.validation_service import validate_body
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
+
+
 
 
 @auth_bp.route("/register", methods=["POST"])

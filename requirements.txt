@@ -8,3 +8,4 @@ black
 psycopg2
 alembic
 flask_cors
+openai

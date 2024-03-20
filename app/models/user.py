@@ -9,3 +9,4 @@ class User(Base):
     user_name: Mapped[str]
     password: Mapped[str]
 
+
