@@ -1,14 +1,10 @@
-import os
+from datetime import datetime
 
-import bcrypt
-import jwt
-from flask import Blueprint, request
+from flask import Blueprint
 
 from app.database import Session
-from app.models.feedback import Feedback
 from app.models.topic import Topic
-from app.schema.auth import AuthSchema
-from app.schema.topic import TopicSchema
+from app.schema.topic import TopicSchema, DeleteSchema, CreateTopicSchema
 from app.services.jwt_service import jwt_required
 from app.services.validation_service import validate_body
 
@@ -18,7 +14,7 @@ topic_bp = Blueprint("topic", __name__, url_prefix="/topic")
 @topic_bp.route("/list", methods=["GET"])
 @jwt_required
 @validate_body(TopicSchema)
-def get_topics(current_user, body: AuthSchema):
+def get(current_user, body: TopicSchema):
     session = Session()
     query = (
         session.query(Topic)
@@ -37,3 +33,40 @@ def get_topics(current_user, body: AuthSchema):
         ],
         "total": query.count(),
     }
+
+
+@topic_bp.route('/delete', methods=["DELETE"])
+@validate_body(DeleteSchema)
+def delete(body: DeleteSchema):
+    session = Session()
+    topic = session.query(Topic).filter(Topic.id == body.topic_id).first()
+    if topic:
+        session.delete(topic)
+        session.commit()
+
+        return {"message": "Topic deleted successfully"}, 200
+    else:
+        return {"message": "Topic not found or you don't have permission to delete it"}, 404
+
+
+@topic_bp.route('/create', methods=["POST"])
+@jwt_required
+@validate_body(CreateTopicSchema)
+def create(body: CreateTopicSchema, current_user):
+    session = Session()
+    try:
+        new_topic = Topic(
+            user_id=current_user.id,
+            content=body.content,
+            created_at=datetime.now()
+        )
+        session.add(new_topic)
+        session.commit()
+        return {"message": "Topic created successfully"}, 201
+    except Exception as e:
+        session.rollback()
+        return {"message": "Failed to create topic", "error": str(e)}, 500
+    finally:
+        session.close()
+
+

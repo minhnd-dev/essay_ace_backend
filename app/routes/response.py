@@ -1,24 +1,31 @@
-import os
+from datetime import datetime
 
-import bcrypt
-import jwt
-from flask import Blueprint, request
+from flask import Blueprint
 
 from app.database import Session
 from app.models.response import Response
-from app.models.topic import Topic
-from app.schema.auth import AuthSchema
-from app.schema.response import ResponseSchema
-from app.services.jwt_service import jwt_required
+from app.schema.response import ResponseSchema, SaveWritingSchema
 from app.services.validation_service import validate_body
 
 response_bp = Blueprint("response", __name__, url_prefix="/response")
 
 
+@response_bp.route('/save', methods=['POST'])
+@validate_body(SaveWritingSchema)
+def save(body: SaveWritingSchema):
+    session = Session()
+    response = Response(content=body.content, created_at=datetime.now())
+    session.add(response)
+    session.commit()
+    if response:
+        return {"message": "Content writing added successfully"}, 200
+    else:
+        return {"message": "Added fail"}, 404
+
+
 @response_bp.route("/detail", methods=["GET"])
-@jwt_required
 @validate_body(ResponseSchema)
-def detail(current_user, body: AuthSchema):
+def detail(body: ResponseSchema):
     session = Session()
     response = session.query(Response).filter_by(topic_id=body.topic_id).first()
     if not response:
@@ -31,3 +38,4 @@ def detail(current_user, body: AuthSchema):
                 "feedback": response.feedback,
             }
         }
+

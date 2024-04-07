@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models._base import Base
@@ -12,3 +13,4 @@ class Feedback(Base):
     updated_at: Mapped[datetime]
     content: Mapped[str]
     rewrite: Mapped[str]
+    response_id: Mapped[int] = mapped_column(ForeignKey("responses.id"))

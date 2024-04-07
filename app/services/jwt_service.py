@@ -36,4 +36,5 @@ def jwt_required(function):
                 "message": "Token is invalid",
             }, 401
         return function(current_user, *args, **kwargs)
+    inner_function.__name__ = function.__name__
     return inner_function

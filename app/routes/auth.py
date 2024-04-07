@@ -7,14 +7,15 @@ from flask import Blueprint, request
 from app.database import Session
 from app.models.user import User
 from app.schema.auth import AuthSchema
+from app.services.jwt_service import jwt_required
 from app.services.validation_service import validate_body
+
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 
-
-
 @auth_bp.route("/register", methods=["POST"])
+@jwt_required
 @validate_body(AuthSchema)
 def register(body: AuthSchema):
     session = Session()
@@ -34,17 +35,19 @@ def register(body: AuthSchema):
 
 
 @auth_bp.route("/change_password", methods=["PUT"])
-def change_password():
+@jwt_required
+@validate_body(AuthSchema)
+def change_password(body: AuthSchema):
     session = Session()
+    if not body.password:
+        return "Missing password", 400
+    if not body.new_password:
+        return "Missing new password", 400
+    user = session.query(User).filter_by(user_name=body.user_name).first()
 
-    user_name = request.json.get("user_name", None)
-    new_password = request.json.get("new_password", None)
-    password = request.json.get("password", None)
-    user = session.query(User).filter_by(user_name=user_name).first()
-
-    if bcrypt.checkpw(password.encode("utf-8"), user.password.encode("utf-8")):
+    if user and bcrypt.checkpw(body.password.encode("utf-8"), user.password.encode("utf-8")):
         hashed_new_password = bcrypt.hashpw(
-            new_password.encode("utf-8"), bcrypt.gensalt()
+            body.new_password.encode("utf-8"), bcrypt.gensalt()
         ).decode("utf-8")
         user.password = hashed_new_password
         session.commit()
@@ -54,6 +57,7 @@ def change_password():
 
 
 @auth_bp.route("/login", methods=["POST"])
+@jwt_required
 @validate_body(AuthSchema)
 def login(body: AuthSchema):
     session = Session()
@@ -75,3 +79,17 @@ def login(body: AuthSchema):
         return {
             "message": "Wrong password",
         }, 401
+
+
+@auth_bp.route("/delete", methods=["DELETE"])
+@jwt_required
+@validate_body(AuthSchema)
+def delete(body: AuthSchema):
+    session = Session()
+    user = session.query(User).filter_by(id=body.id).first()
+    if not user:
+        return {"message": "User not found"}, 404
+    else:
+        session.delete(user)
+        session.commit()
+        return {"message": "User deleted successfully"}, 200

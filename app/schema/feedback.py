@@ -1,6 +1,12 @@
+from datetime import datetime
+
 from pydantic import BaseModel
 
 
 class FeedbackSchema(BaseModel):
+    id: int
+
+
+class RewriteSchema(BaseModel):
     content: str
-    rewrite: str
+    response_id: int

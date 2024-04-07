@@ -9,3 +9,6 @@ psycopg2
 alembic
 flask_cors
 openai
+Authlib
+flask-socketio
+stripe
