@@ -12,3 +12,4 @@ openai
 Authlib
 flask-socketio
 stripe
+

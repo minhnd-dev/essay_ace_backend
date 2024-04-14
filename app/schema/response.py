@@ -7,3 +7,8 @@ class ResponseSchema(BaseModel):
 
 class SaveWritingSchema(BaseModel):
     content: str
+
+
+class ListWritingSchema(BaseModel):
+    limit: int
+    offset: int

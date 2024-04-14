@@ -14,7 +14,7 @@ topic_bp = Blueprint("topic", __name__, url_prefix="/topic")
 @topic_bp.route("/list", methods=["GET"])
 @jwt_required
 @validate_body(TopicSchema)
-def get(current_user, body: TopicSchema):
+def get(body: TopicSchema, current_user):
     session = Session()
     query = (
         session.query(Topic)

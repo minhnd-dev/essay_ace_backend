@@ -22,3 +22,5 @@ class DeleteSchema(BaseModel):
 
 class CreateTopicSchema(BaseModel):
     content: str
+
+

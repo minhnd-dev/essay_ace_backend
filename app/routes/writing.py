@@ -38,6 +38,7 @@ def feedback(body: WritingSchema, current_user):
     generated_review = completion.choices[-1].message.json()
     feedback_content = json.loads(generated_review)["content"]
     feedback = session.query(Feedback).filter_by(response_id=response_id).first()
+    feedback.created_at = datetime.now()
     session.add(feedback)
     session.commit()
     feedback_data = {

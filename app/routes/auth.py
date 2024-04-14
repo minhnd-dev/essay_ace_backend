@@ -1,8 +1,8 @@
 import os
-import openai
+
 import bcrypt
 import jwt
-from flask import Blueprint, request
+from flask import Blueprint
 
 from app.database import Session
 from app.models.user import User
@@ -10,12 +10,10 @@ from app.schema.auth import AuthSchema
 from app.services.jwt_service import jwt_required
 from app.services.validation_service import validate_body
 
-
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 
 @auth_bp.route("/register", methods=["POST"])
-@jwt_required
 @validate_body(AuthSchema)
 def register(body: AuthSchema):
     session = Session()
@@ -57,7 +55,6 @@ def change_password(body: AuthSchema):
 
 
 @auth_bp.route("/login", methods=["POST"])
-@jwt_required
 @validate_body(AuthSchema)
 def login(body: AuthSchema):
     session = Session()
@@ -84,12 +81,9 @@ def login(body: AuthSchema):
 @auth_bp.route("/delete", methods=["DELETE"])
 @jwt_required
 @validate_body(AuthSchema)
-def delete(body: AuthSchema):
+def delete(body: AuthSchema, current_user):
     session = Session()
-    user = session.query(User).filter_by(id=body.id).first()
-    if not user:
-        return {"message": "User not found"}, 404
-    else:
-        session.delete(user)
-        session.commit()
-        return {"message": "User deleted successfully"}, 200
+    user = session.query(User).filter_by(id=current_user.id).first()
+    session.delete(user)
+    session.commit()
+    return {"message": "User deleted successfully"}, 200
