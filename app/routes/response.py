@@ -47,7 +47,13 @@ def save(body: SaveResponseSchema, current_user):
         response.updated_at = datetime.now()
 
     session.commit()
-    return {"message": "Content writing added successfully"}, 200
+    return {
+        "message": "Content writing added successfully",
+        "data": {
+            "response_id": response.id,
+            "topic_id": topic.id,
+        },
+    }, 200
 
 
 @response_bp.route("/detail", methods=["GET"])

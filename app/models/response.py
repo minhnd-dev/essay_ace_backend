@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models._base import Base
 
@@ -15,3 +15,5 @@ class Response(Base):
     content: Mapped[str]
     updated_at: Mapped[datetime]
     created_at: Mapped[datetime]
+
+    topic = relationship("Topic", back_populates="responses")

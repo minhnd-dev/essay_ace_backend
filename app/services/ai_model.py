@@ -53,8 +53,9 @@ class AIModel:
                     f"Give me feed back on the content this "
                     f"text with the following questions: I'm interested in your feedback on "
                     f"this writing. What's your evaluation?, Can you provide feedback on "
-                    f"grammar and language usage?Please evaluate based on IELTS scoring "
-                    f"criteria",
+                    f"grammar and language usage? Please evaluate based on IELTS scoring "
+                    f"criteria and provide a score for each criterion. "
+                    f"Each criteria feed back should be in bullet points.",
                 },
             ]
         )

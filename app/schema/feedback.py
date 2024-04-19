@@ -10,3 +10,7 @@ class FeedbackSchema(BaseModel):
 class RewriteSchema(BaseModel):
     content: str
     response_id: int
+
+
+class CreateFeedbackSchema(BaseModel):
+    response_id: int
