@@ -8,14 +8,14 @@ from app.models.topic import Topic
 from app.schema.topic import TopicSchema, DeleteSchema, CreateTopicSchema
 from app.services.ai_model import AIModel
 from app.services.jwt_service import jwt_required
-from app.services.validation_service import validate_body
+from app.services.validation_service import validate_body, validate_params
 
 topic_bp = Blueprint("topic", __name__, url_prefix="/topic")
 
 
 @topic_bp.route("/list", methods=["GET"])
 @jwt_required
-@validate_body(TopicSchema)
+@validate_params(TopicSchema)
 def get(body: TopicSchema, current_user):
     session = Session()
     query = (
