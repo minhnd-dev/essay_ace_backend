@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models._base import Base
 
@@ -14,3 +14,5 @@ class Feedback(Base):
     content: Mapped[str]
     rewrite: Mapped[str]
     response_id: Mapped[int] = mapped_column(ForeignKey("responses.id"))
+
+    response = relationship("Response", back_populates="feedback")

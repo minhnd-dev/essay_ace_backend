@@ -4,6 +4,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models._base import Base
+from app.models.feedback import Feedback
 
 
 class Response(Base):
@@ -17,3 +18,4 @@ class Response(Base):
     created_at: Mapped[datetime]
 
     topic = relationship("Topic", back_populates="responses")
+    feedback = relationship(Feedback, back_populates="response")
