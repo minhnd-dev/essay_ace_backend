@@ -4,23 +4,50 @@ from flask import Blueprint
 
 from app.database import Session
 from app.models.response import Response
-from app.schema.response import ResponseSchema, SaveWritingSchema, ListWritingSchema
+from app.models.topic import Topic
+from app.schema.response import ResponseSchema, SaveResponseSchema, ListWritingSchema
+from app.services.jwt_service import jwt_required
 from app.services.validation_service import validate_body
 
 response_bp = Blueprint("response", __name__, url_prefix="/response")
 
 
-@response_bp.route('/save', methods=['POST'])
-@validate_body(SaveWritingSchema)
-def save(body: SaveWritingSchema):
+@response_bp.route("", methods=["POST"])
+@jwt_required
+@validate_body(SaveResponseSchema)
+def save(body: SaveResponseSchema, current_user):
     session = Session()
-    response = Response(content=body.content, created_at=datetime.now())
-    session.add(response)
-    session.commit()
-    if response:
-        return {"message": "Content writing added successfully"}, 200
+
+    topic = (
+        session.query(Topic)
+        .filter(Topic.id == body.topic_id, Topic.user_id == current_user.id)
+        .first()
+    )
+    if not topic:
+        topic = Topic(
+            user_id=current_user.id,
+            content=body.topic_content,
+            type="TASK_2",
+            created_at=datetime.now(),
+            updated_at=datetime.now(),
+        )
+        session.add(topic)
+
+    response = session.query(Response).filter(Response.topic_id == topic.id).first()
+    if not response:
+        response = Response(
+            content=body.content,
+            topic_id=topic.id,
+            created_at=datetime.now(),
+            updated_at=datetime.now(),
+        )
+        session.add(response)
     else:
-        return {"message": "Added fail"}, 404
+        response.content = body.content
+        response.updated_at = datetime.now()
+
+    session.commit()
+    return {"message": "Content writing added successfully"}, 200
 
 
 @response_bp.route("/detail", methods=["GET"])
@@ -38,6 +65,7 @@ def detail(body: ResponseSchema):
                 "feedback": response.feedback,
             }
         }
+
 
 @response_bp.route("/list", methods=["PUT"])
 def get(body: ListWritingSchema, current_user):
