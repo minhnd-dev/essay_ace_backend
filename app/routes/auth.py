@@ -6,7 +6,7 @@ from flask import Blueprint
 
 from app.database import Session
 from app.models.user import User
-from app.schema.auth import AuthSchema
+from app.schema.auth import AuthSchema, ChangePasswordSchema
 from app.services.jwt_service import jwt_required
 from app.services.validation_service import validate_body
 
@@ -23,7 +23,9 @@ def register(body: AuthSchema):
     if not body.password:
         return "Missing password", 400
 
-    hashed = bcrypt.hashpw(body.password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+    hashed = bcrypt.hashpw(body.password.encode("utf-8"), bcrypt.gensalt()).decode(
+        "utf-8"
+    )
 
     user = User(user_name=body.user_name, password=hashed)
 
@@ -32,18 +34,20 @@ def register(body: AuthSchema):
     return {"user_id": user.id, "user_name": user.user_name}
 
 
-@auth_bp.route("/change_password", methods=["PUT"])
+@auth_bp.route("/change-password", methods=["PUT"])
 @jwt_required
-@validate_body(AuthSchema)
-def change_password(body: AuthSchema):
+@validate_body(ChangePasswordSchema)
+def change_password(body: ChangePasswordSchema, current_user):
     session = Session()
     if not body.password:
         return "Missing password", 400
     if not body.new_password:
         return "Missing new password", 400
-    user = session.query(User).filter_by(user_name=body.user_name).first()
+    user = session.query(User).filter_by(id=current_user.id).first()
 
-    if user and bcrypt.checkpw(body.password.encode("utf-8"), user.password.encode("utf-8")):
+    if user and bcrypt.checkpw(
+        body.password.encode("utf-8"), user.password.encode("utf-8")
+    ):
         hashed_new_password = bcrypt.hashpw(
             body.new_password.encode("utf-8"), bcrypt.gensalt()
         ).decode("utf-8")
